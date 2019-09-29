@@ -23,7 +23,7 @@ def get_news(publication="bbc"):
           <p>{2}</p> </ br>
       </body>
     </html>""".format(first_article.get("title"),
-                      first_article.get("pubished"),
+                      first_article.get("published"),
                       first_article.get("summary"))
   
 
