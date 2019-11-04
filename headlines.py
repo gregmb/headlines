@@ -4,7 +4,8 @@ from flask import render_template
 from flask import request
 import json
 import requests
-from urllib.parse import urlencode, puote_plus
+import objectpath
+
 
 app = Flask(__name__)
 
@@ -27,10 +28,10 @@ def get_news():
     weather = get_weather("London,UK")
     return(render_template("home.html", articles=feed['entries'],weather=weather))
 
-def get_weather(query):
-    api_url = 'http://apiopenweathermap.org/data/2.5/weather'?q={ }&appid
-    params = {'appid' : 'ec152d53a4c74873d56523adabb25269', 'q' : city}}
-    data = urllib2.urlopen(url).read()
+def get_weather(city):
+    api_url = 'http://apiopenweathermap.org/data/2.5/weather'
+    params = {'appid' : 'ec152d53a4c74873d56523adabb25269', 'q' : city}
+    data = 
     parsed = json.loads(data)
     weather = None
     if parsed.get("weather"):
