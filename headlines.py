@@ -30,24 +30,31 @@ def get_news():
 def get_weather(query):
     api_url = 'http://api.openweathermap.org/data/2.5/weather'
     city = city_id(query)
-    params = {'appid': 'ec152d53a4c74873d56523adabb25269', 'q': city}
+    params = {'appid': 'ec152d53a4c74873d56523adabb25269', 'q': city,
+              'units': 'imperial'}
     data = requests.get(api_url, params=params)
-    parsed = json.loads(data)
+    parsed = data.json()
     weather = None
-    if parsed["weather"]:
+    if parsed.get('weather'):
         weather = {"description": parsed["weather"][0]["description"],
-                   "temperature": parsed["main"]["temp"], "city": parsed["name"]
+                   "temperature": parsed["main"]["temp"],
+                   "city": parsed["name"]
                    }
-    return weather
-                        
+    return(weather)
+                   
 
 def city_id(input):
+    #This function is to transform the city, country input into
+    #the city id used by openWeather API.
     with open('city.list.json') as f:
         cityCodes = json.load(f)
     name, country = input.split(',')
-    code = [x['id'] for x in cityCodes if x['name']==name and x['country']==country]
+    code = [x['id'] for x in cityCodes if (x['name'] == name
+                                           and x['country'] == country)]
+    #Just using first city returned in the case of multiple for a
+    #single country (US). Will return later to try parsing per state.
     return(code[0])
-   
-   
+
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
