@@ -30,15 +30,15 @@ def get_news():
 def get_weather(query):
     api_url = 'http://api.openweathermap.org/data/2.5/weather'
     city = city_id(query)
-    params = {'appid': 'ec152d53a4c74873d56523adabb25269', 'q': city,
+    params = {'appid': 'ec152d53a4c74873d56523adabb25269', 'id': city,
               'units': 'imperial'}
     data = requests.get(api_url, params=params)
     parsed = data.json()
     weather = None
     if parsed.get('weather'):
-        weather = {"description": parsed["weather"][0]["description"],
-                   "temperature": parsed["main"]["temp"],
-                   "city": parsed["name"]
+        weather = {'description': parsed["weather"][0]["description"],
+                   'temperature': parsed["main"]["temp"],
+                   'city': parsed["name"]
                    }
     return(weather)
                    
