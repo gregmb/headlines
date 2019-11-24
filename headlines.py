@@ -1,3 +1,4 @@
+from appkeys import weather_key, currency_key
 import feedparser
 from flask import Flask
 from flask import render_template
@@ -8,6 +9,9 @@ import requests
 
 app = Flask(__name__)
 
+weather_url = 'http://api.openweathermap.org/data/2.5/weather'
+currency_url = 'https://openexchangerates.org//api/latest.json'
+
 RSS_FEEDS = {'bbc': 'http://feeds.bbci.co.uk/news/rss.xml',
              'cnn': 'http://rss.cnn.com/rss/edition.rss',
              'fox': 'http://feeds.foxnews.com/foxnews/latest',
@@ -15,7 +19,9 @@ RSS_FEEDS = {'bbc': 'http://feeds.bbci.co.uk/news/rss.xml',
 
 
 DEFAULTS = {'publication': 'bbc',
-            'city': 'London,UK'}
+            'city': 'London,UK',
+            'currency_frm': 'GBP',
+            'currency_to': 'USD'}
 
 
 @app.route("/")
@@ -30,8 +36,19 @@ def home():
     if not city:
         city = DEFAULTS['city']
     weather = get_weather(city)
+    # get customized currency data based on user input or default
+    currency_from = request.args.get('currency_from')
+    if not currency_from:
+        currency_from = DEFAULTS['currency_frm']
+    currency_to = request.args.get('currency_to')
+    if not currency_to:
+        currency_to = DEFAULTS['currency_to']
+    rate = get_rate(currency_from, currency_to)
     return(render_template("home.html", articles=articles,
-                           weather=weather))
+                           weather=weather,
+                           currency_from=currency_from,
+                           currency_to=currency_to,
+                           rate=rate))
 
 
 def get_news(query):
@@ -44,19 +61,27 @@ def get_news(query):
 
 
 def get_weather(city):
-    api_url = 'http://api.openweathermap.org/data/2.5/weather'
     cityid = city_id(city)
-    params = {'appid': 'ec152d53a4c74873d56523adabb25269', 'id': cityid,
+    params = {'appid': weather_key, 'id': cityid,
               'units': 'imperial'}
-    data = requests.get(api_url, params=params)
+    data = requests.get(weather_url, params=params)
     parsed = data.json()
     weather = None
     if parsed.get('weather'):
-        weather = {'description': parsed["weather"][0]["description"],
-                   'temperature': parsed["main"]["temp"],
-                   'city': parsed["name"]
+        weather = {'description': parsed['weather'][0]['description'],
+                   'temperature': parsed['main']['temp'],
+                   'city': parsed['name'], 'country': parsed['sys']['country']
                    }
     return(weather)
+
+
+def get_rate(frm, to):
+    params = {'app_id': currency_key}
+    all_currency = requests.get(currency_url, params=params)
+    parsed = all_currency.json()['rates']
+    frm_rate = parsed.get(frm.upper())
+    to_rate = parsed.get(to.upper())
+    return(to_rate/frm_rate)
 
 
 def city_id(input):
