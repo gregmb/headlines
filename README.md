@@ -4,7 +4,7 @@ This project is a dashboard to display news headlines and various other informat
 
 Weather from Openweather api.
 
-Currency information from OpenCurrency.
+Currency information from Open Exchange Rates.
 
 dashboard ip 104.248.52.254
 
