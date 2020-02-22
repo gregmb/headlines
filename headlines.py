@@ -113,7 +113,7 @@ def get_rate(frm, to):
 
 def city_id(rawcity):
     """Returns city id used by openWeather API from user input."""
-    with open('city.list.json', encoding='utf-8') as f:
+    with open('/var/www/headlines/city.list.json', encoding='utf-8') as f:
         citycodes = json.load(f)
     rawcity += ', '
     name, country = rawcity.split(',')[:2]
