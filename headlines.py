@@ -120,6 +120,8 @@ def city_id(rawcity):
     name, country = name.strip().capitalize(), country.strip().upper()
     if country == 'UK':
         country = 'GB'
+    if name in 'New york city':
+        name = 'Manhattan'        
     codes = [(x['id'], x['country']) for x in citycodes if x['name'] == name]
     if country:
         city_id = [x for (x, y) in codes if y == country]
