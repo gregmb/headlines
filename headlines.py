@@ -47,8 +47,12 @@ def home():
     publication = get_value_with_fallback('publication')
     articles = get_news(publication)
     # get customized weather based on user input or default
+    if request.cookies.get('cityid'):
+        oldcity = request.cookies.get('cityid')
+    else:
+        oldcity = 0
     city = get_value_with_fallback('city')
-    weather = get_weather(city)
+    weather, cityid = get_weather(city=city, oldid=oldcity)
     # get customized currency data based on user input or default
     currency_from = get_value_with_fallback('currency_from')
     currency_to = get_value_with_fallback('currency_to')
@@ -67,6 +71,10 @@ def home():
     response.set_cookie('city', city, expires=expires)
     response.set_cookie('currency_from', currency_from, expires=expires)
     response.set_cookie('currency_to', currency_to, expires=expires)
+    try:
+        response.set_cookie('cityid', cityid, expires=expires)
+    except TypeError:
+        None
     return response
 
 
@@ -80,9 +88,9 @@ def get_news(query):
     return feed['entries']
 
 
-def get_weather(city):
+def get_weather(city, oldid=0):
     """Return weather data for given city."""
-    cityid = city_id(city)
+    cityid = city_id(city, oldid)
     params = {
         'appid': weather_key,
         'id': cityid,
@@ -98,7 +106,7 @@ def get_weather(city):
             'city': parseddata['name'],
             'country': parseddata['sys']['country']
         }
-    return weather
+    return weather, cityid
 
 
 def get_rate(frm, to):
@@ -111,8 +119,10 @@ def get_rate(frm, to):
     return (to_rate/frm_rate, parseddata.keys())
 
 
-def city_id(rawcity):
+def city_id(rawcity, cityid):
     """Returns city id used by openWeather API from user input."""
+    #First line is for testing during production
+    #with open('./city.list.json', encoding='utf-8') as f:
     with open('/var/www/headlines/city.list.json', encoding='utf-8') as f:
         citycodes = json.load(f)
     rawcity += ', '
@@ -120,13 +130,16 @@ def city_id(rawcity):
     name, country = name.strip().capitalize(), country.strip().upper()
     if country == 'UK':
         country = 'GB'
-    if name in 'New york city':
-        name = 'Manhattan'        
+    if any([name in x for x in ['New york city', 'Nyc']]):
+        name = 'Manhattan'       
     codes = [(x['id'], x['country']) for x in citycodes if x['name'] == name]
-    if country:
-        city_id = [x for (x, y) in codes if y == country]
+    if len(codes):
+        if country:
+            city_id = [x for (x, y) in codes if y == country]
+        else:
+            city_id = codes[0]
     else:
-        city_id = codes[0]
+        city_id = [cityid]
     # Just using first city returned in the case of multiple for a
     # single country (US). Will return later to try parsing per state.
     return city_id[0]
