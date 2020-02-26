@@ -17,8 +17,7 @@ currency_url = 'https://openexchangerates.org//api/latest.json'
 RSS_FEEDS = {'bbc': 'http://feeds.bbci.co.uk/news/rss.xml',
              'cnn': 'http://rss.cnn.com/rss/edition.rss',
              'fox': 'http://feeds.foxnews.com/foxnews/latest',
-             'iol': 'http://www.iol.co.za/cmlink/1.640'
-}
+             'iol': 'http://www.iol.co.za/cmlink/1.640'}
 
 
 DEFAULTS = {'publication': 'bbc',
@@ -32,7 +31,7 @@ def get_value_with_fallback(key):
     """Return value whether key was user defined,
     stored in cookie, or default
     """
-    
+
     if request.args.get(key):
         return request.args.get(key)
     elif request.cookies.get(key):
@@ -121,8 +120,8 @@ def get_rate(frm, to):
 
 def city_id(rawcity, cityid):
     """Returns city id used by openWeather API from user input."""
-    #First line is for testing during production
-    #with open('./city.list.json', encoding='utf-8') as f:
+    # First line is for testing during production
+    # with open('./city.list.json', encoding='utf-8') as f:
     with open('/var/www/headlines/city.list.json', encoding='utf-8') as f:
         citycodes = json.load(f)
     rawcity += ', '
@@ -131,7 +130,7 @@ def city_id(rawcity, cityid):
     if country == 'UK':
         country = 'GB'
     if any([name in x for x in ['New york city', 'Nyc']]):
-        name = 'Manhattan'       
+        name = 'Manhattan'
     codes = [(x['id'], x['country']) for x in citycodes if x['name'] == name]
     if len(codes):
         if country:
